@@ -4,66 +4,84 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Library {
-    private List<Book> books;    // Kütüphanedeki kitaplar
-    private List<User> users;    // Kütüphanedeki kullanıcılar
-    private List<Transaction> transactions; // Ödünç işlemleri
+    private List<Book> books = new ArrayList<>();          // Kütüphanedeki kitapların listesi
+    private List<User> users = new ArrayList<>();          // Kütüphanedeki kullanıcıların listesi
+    private List<Transaction> transactions = new ArrayList<>(); // Kütüphanedeki işlemlerin listesi
 
-    public Library() {
-        this.books = new ArrayList<>();
-        this.users = new ArrayList<>();
-        this.transactions = new ArrayList<>();
-    }
-
-    // Kitap ekleme ve çıkarma metodları
+    // Kitap ekleme
     public void addBook(Book book) {
         books.add(book);
-        System.out.println(book.getTitle() + " kütüphaneye eklendi.");
     }
 
+    // Kitap çıkarma
     public void removeBook(Book book) {
         books.remove(book);
-        System.out.println(book.getTitle() + " kütüphaneden çıkarıldı.");
     }
 
-    // Kullanıcı ekleme ve çıkarma metodları
+    // Kullanıcı ekleme
     public void addUser(User user) {
         users.add(user);
-        System.out.println(user.getName() + " kütüphaneye eklendi.");
     }
 
+    // Kullanıcı çıkarma
     public void removeUser(User user) {
         users.remove(user);
-        System.out.println(user.getName() + " kütüphaneden çıkarıldı.");
     }
 
-    // Kullanıcıları döndüren metod
+    // Tüm kitapları döndürme
+    public List<Book> getAllBooks() {
+        return books;
+    }
+
+    // Tüm kullanıcıları döndürme
     public List<User> getAllUsers() {
         return users;
     }
 
-    // Transaction ekleme metodu
+    // Tüm işlemleri döndürme
+    public List<Transaction> getAllTransactions() {
+        return transactions;
+    }
+
+    // Yeni bir işlem ekleme
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
     }
 
-    // Ödünç işlemini kitaba göre bulma metodu
+    // Kullanıcıya ait tüm işlemleri döndüren metot
+    public List<Transaction> getTransactionsForUser(User user) {
+        List<Transaction> userTransactions = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            if (transaction.getUser().equals(user)) {
+                userTransactions.add(transaction);
+            }
+        }
+        return userTransactions;
+    }
+
+    // Kitaba göre ödünç alma işlemini bulma
     public Transaction getTransactionByBook(Book book) {
         for (Transaction transaction : transactions) {
             if (transaction.getBook().equals(book)) {
                 return transaction;
             }
         }
-        return null;
+        return null; // Eğer kitapla eşleşen bir işlem yoksa null döner
     }
 
-    // Tüm kitapları döndüren metod
-    public List<Book> getAllBooks() {
-        return books;
+    // Gecikmiş işlemleri döndüren metot
+    public List<Transaction> getDelayedTransactions() {
+        List<Transaction> delayedTransactions = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            if (transaction.getLateDays() > 0) {
+                delayedTransactions.add(transaction);
+            }
+        }
+        return delayedTransactions;
     }
 
-    // Kütüphanedeki mevcut kitapları yazdırma
+    // Tüm kitapları yazdırma
     public void printAllBooks() {
-        System.out.println("Kütüphanedeki Kitaplar:");
         for (Book book : books) {
             System.out.println(book.getTitle() + " - " + book.getAuthor());
         }

@@ -2,89 +2,71 @@ package org.example;
 
 import org.example.library.*;
 
-import java.util.List;
+import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
-
-        // Kütüphaneyi oluşturuyoruz
+        // Kütüphane ve kütüphaneciyi oluştur
         Library library = new Library();
-        // Kütüphaneci ve kullanıcıları oluşturuyoruz
-        Librarian librarian = new Librarian("Şevval Sağlam", "sivas58",UserType.LIBRARIAN);
-        Member member1 = new Member("Selen Solmaz", "kastamonu37", UserType.REGULAR);
-        Member member2 = new Member("Nisa Akyüz", "of61", UserType.PREMIUM);
+        Librarian librarian = new Librarian("Selen Solmaz", "password789", UserType.LIBRARIAN,library);
+        library.addUser(librarian);
 
-        // Kullanıcıları kütüphaneye ekliyoruz
-        library.addUser(member1);
-        library.addUser(member2);
+        // Kitapları oluştur
+        Book book1 = new Book("Yüzyıllık Yalnızlık", "Gabriel Garcia Marquez", 50.0,Category.CLASSICS,"312313");
+        Book book2 = new Book("Sefiller", "Victor Hugo", 40.0,Category.CLASSICS,"2435454");
+        Book book3 = new Book("Bülbülü Öldürmek", "Harper Lee", 30.0, Category.CLASSICS,"423424");
 
-        Book book1 = new Book("Anna Karenina1", "Lev Tolstoy",100.0, Category.CLASSIC);
-        Book book2 = new Book("Anna Karenina2", "Lev Tolstoy",150.0,Category.CLASSIC );
-        Book book3 = new Book("Anna Karenina3", "Lev Tolstoy", 120.0,Category.CLASSIC );
+        // Kitapları kütüphaneye ekle
+        librarian.addBook(book1);
+        librarian.addBook(book2);
+        librarian.addBook(book3);
 
-        // Kitapları kütüphaneye ekliyoruz
-        librarian.addBook(library, book1);
-        librarian.addBook(library, book2);
-        librarian.addBook(library, book3);
+        // Kullanıcıları oluştur
+        User user1 = new User("Şevval Sağlam", "userpassword", UserType.REGULAR);
+        User user2 = new User("Ali Can", "userpassword2", UserType.REGULAR);
 
-        // Kullanıcı 1, 2 kitap ödünç alıyor
-        member1.borrowBook(book1, library);
-        member1.borrowBook(book2, library);
+        // Kullanıcıları kütüphaneye ekle
+        librarian.addUser(user1);
+        librarian.addUser(user2);
 
-        // Kullanıcı 2, 1 kitap ödünç alıyor
-        member2.borrowBook(book3, library);
+        // Kullanıcının kitap ödünç alma işlemi
+        user1.borrowBook(book1, library); // Şevval Sağlam, Yüzyıllık Yalnızlık'ı ödünç alır
+        user1.borrowBook(book2, library); // Şevval Sağlam, Sefiller'i ödünç alır
 
+        // Ödünç alma işlemi sonrası kullanıcıdan bir kitap iade etme işlemi
+        user1.returnBook(book1,library); // Şevval Sağlam, Yüzyıllık Yalnızlık'ı iade eder.
 
-        // Ödünç alınan kitapları ve kullanıcıları görüntüleyelim
-        System.out.println("Selen'in ödünç aldığı kitaplar:");
-        List<Book> selenBooks = member1.getBorrowedBooks();
-        for (Book book : selenBooks) {
-            System.out.println(book.getTitle());
+        // Kullanıcının kitap sayısını kontrol et
+        System.out.println(user1.getName() + " toplam " + user1.getBorrowedBooks().size() + " kitap ödünç aldı.");
+
+        // Diğer kullanıcı kitap ödünç alıyor
+        user2.borrowBook(book3, library); // Ali Can, Bülbülü Öldürmek'i ödünç alır
+
+        // Ödünç alınan kitaplar ve cezalar
+        System.out.println("Ödünç alınan kitaplar:");
+        for (Book book : user1.getBorrowedBooks()) {
+            System.out.println("- " + book.getTitle());
         }
 
-        System.out.println("Nisa'nın ödünç aldığı kitaplar:");
-        List<Book> nisaBooks = member2.getBorrowedBooks();
-        for (Book book : nisaBooks) {
-            System.out.println(book.getTitle());
+        System.out.println("Cezası olan kullanıcılar:");
+        if (user1.hasPenalty(library)) {
+            System.out.println(user1.getName() + " ceza almıştır.");
+        } else {
+            System.out.println(user1.getName() + " ceza almamıştır.");
         }
 
 
+            //TRANSACTION
+            // Kitap ödünç alma işlemi oluşturma
+            Transaction transaction = new Transaction(book1,user1, LocalDate.now(),Action.ODUNC_ALMA);
+            library.addTransaction(transaction);
+            System.out.println(user1.getName() + " " + book1.getTitle() + " kitabını ödünç aldı.");
 
-        // Alice'in kitabı 10 gün gecikti
-        Transaction transaction1 = library.getTransactionByBook(book1);
-        transaction1.setReturnDate(transaction1.getBorrowDate().plusDays(24)); // 10 gün gecikme
-        PenaltyCalculator calculator = new PenaltyCalculator();
-        double penalty1 = calculator.calculatePenalty(transaction1, book1.getPrice());
-        transaction1.setPenalty(penalty1); // Ceza ayarlanıyor
-        System.out.println("\nAlice'in gecikme cezası: " + transaction1.getPenalty() + " TL");
-
-// Bob'un kitabı 22 gün gecikti
-        Transaction transaction2 = library.getTransactionByBook(book3);
-        transaction2.setReturnDate(transaction2.getBorrowDate().plusDays(36)); // 22 gün gecikme
-        double penalty2 = calculator.calculatePenalty(transaction2, book3.getPrice());
-        transaction2.setPenalty(penalty2); // Ceza ayarlanıyor
-        System.out.println("Bob'un gecikme cezası: " + transaction2.getPenalty() + " TL");
-
-
-
-        // Kitapları iade etme
-        member1.returnBook(book1, library);
-        member2.returnBook(book3, library);
-
-        // Kitapların iade edilip edilmediğini kontrol edelim
-        System.out.println("Selen'in iade ettiği kitaplar:");
-        selenBooks = member1.getBorrowedBooks();
-
-        if (selenBooks.isEmpty()) {
-            System.out.println("Tüm kitaplar iade edildi.");
-        }
-
-        System.out.println("Nisa'nın iade ettiği kitaplar:");
-        nisaBooks = member2.getBorrowedBooks();
-        if (nisaBooks.isEmpty()) {
-            System.out.println("Tüm kitaplar iade edildi.");
-        }
+            // Kitap iadesi
+            transaction.setReturned(true);
+            transaction.setReturnDate(LocalDate.now().plusDays(10));
+            System.out.println(user1.getName() + " " + book1.getTitle() + " kitabını iade etti.");
 
     }
 }
+

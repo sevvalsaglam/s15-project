@@ -10,7 +10,6 @@ public class PenaltyCalculator {
             return book.getPrice() * 0.75;
         } else {
             return book.getPrice();
-
         }
     }
 }
