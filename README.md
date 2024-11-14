@@ -1,4 +1,4 @@
-TaskFlow
+TaskFlow 📌📝
 
 Projenin Amacı:
 
